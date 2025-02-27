@@ -1,17 +1,17 @@
 # Urban Farming Spatial Pattern
-Portfolio project about spatial autocorellation of urban farming spot in Jakarta
+Portfolio project about spatial autocorellation of urban farming location in Jakarta
 
 ## Introduction
 
 _“The first law of geography: Everything is related to everything else, but near things are more related than distant things.” Waldo R. Tobler (Tobler 1970)_
 
 ### Spatial Autocorrelation
-Toby stated that the first law of geography, observation of certain phenomenon has similarity within neighbours. With closer observation tend to be more related than farther observation. Naturally, human visual can easily determine spatial pattern, however the distinction between pattern sometimes are not so obvious.Therefore, spatial pattern can be determined by using spatial autocorrelation analysis, a spatial analysis that can help to quantitatively determine whether observations are spatially correlated with one another. The conclusion from this analysis can reveals the pattern of the observation such as clustered, dispersed, or random. 
+Tobler stated that the first law of geography, observation of certain phenomenon has similarity within neighbours. With closer observation tend to be more related than farther observation. Naturally, human visual can easily determine spatial pattern, however the distinction between pattern sometimes are not so obvious.Therefore, spatial pattern can be determined by using spatial autocorrelation analysis, a spatial analysis that can help to quantitatively determine whether observations are spatially correlated with one another. The conclusion from this analysis can reveals the pattern of the observation such as clustered, dispersed, or random. 
 
 ### Urban Agriculture
 Urban agriculture has gained increasing attention in recent years as a strategy for addressing food security, climate change, and sustainable development challenges in urban areas such as Jakarta. As there are limited spaces to do conventional farming and increasing demands for food production in Indonesia due to it constant increase of population in Jakarta, urban agriculture can serve as an alternative solution for this problem.
 
-Efforts to encourage urban agriculture has been made by Jakarta’s government and urban farming spots has been emerging in Jakarta for the past years. In this post, we will analyse on the spatial pattern of urban farming spots and discuss the result further.
+Efforts to encourage urban agriculture has been made by Jakarta’s government and urban farms has been emerging in Jakarta for the past years. In this post, we will analyze on the spatial pattern of urban farms and discuss the result further.
 
 
 ## Data
@@ -29,13 +29,15 @@ Another data is urban farming spot census data provided by JakartaSatu portal co
 
 ## Method
 
-One of the most popular methods to determine spatial autocorrelation is by calculating the Moran’s I coefficient. The Moran’s I statistic is the correlation coefficient for the relationship between a variable and its neighboring values.
+One of the most popular methods to determine spatial autocorrelation is by calculating the Moran’s I coefficient. The Moran’s I statistic is the correlation coefficient for the relationship between a variable and its neighboring values. Moran's I statistic has a unique difference in compare to other spatial autocorellation method as it incorporate both spatial location and attribute values in its analysis.
 
 The formula are as follows,
 
-![image](https://github.com/user-attachments/assets/5620120e-684c-4977-9d50-d869bc1b1e03)
+![image](https://github.com/user-attachments/assets/f0583e13-b823-4c04-947b-ea0d8158cbaf)
 
-The data then will follow additional process, Monte Carlo test. The attribute values are randomly assigned to polygons in the data set and, for each permutation of the attribute values, a Moran’s I value is computed. This test was done to estimate significance. The output is a sampling distribution of Moran’s I values under the (null) hypothesis that attribute values are randomly distributed across the study area. We then compare our observed Moran’s I value to this sampling distribution.
+Moran's I coefficient ranges from -1 to 1 with positive value means that the data is clustered while negative value means that the data is dispersed. Otherwise, a near zero result can be intepreted as a random distribution. Furthermore, the calculated result needs to undergo a significance testing (inferential statistics) to determine whether the value of Moran's I is statistically significant to randomness. 
+
+![image](https://github.com/user-attachments/assets/a90dca3b-43df-4107-91f2-11cc56763f89)
 
 ## Analysis
 
@@ -149,26 +151,28 @@ View of Jakarta (Kep.Seribu Isles)
 First step of determining Moran I coefficient is to define the neighbour spatially. For this project, we will define the neighbour as neighbouring polygons that at least share the same vertex,
 
 ```
-nb <- poly2nb(join, queen=TRUE)
+neighbour <- poly2nb(join, queen=TRUE)
 ```
 
 #### Assiging Weight of neighbouring polygons
 
 Each neighboring polygon will be multiplied by the weight equal to 1/(num of neighbours)
 ```
-lw <- nb2listw(nb, style="W", zero.policy=TRUE)
+weight <- nb2listw(neighbour, style="W", zero.policy=TRUE)
 ```
-#### Calculate Moran I coefficient
+#### Calculate Moran I coefficient and significance test
 
-The coefficient can be calculated using this code,
+There are two approach that can be done to assess Moran I coefficient, analytical approach and monte carlo method.
+
+First, the analytical approach can be done by doing a significance test using the moran.test function,
 
 ```
-> moran.test(join$n,lw, alternative="greater")
+> moran.test(join$n,weight, alternative="greater")
 
 	Moran I test under randomisation
 
 data:  join$n  
-weights: lw  
+weights: weight  
 n reduced by no-neighbour observations  
 
 Moran I statistic standard deviate = 1.4771, p-value = 0.06983
@@ -177,37 +181,43 @@ sample estimates:
 Moran I statistic       Expectation          Variance 
        0.11263217       -0.02439024        0.00860548 
 ```
-The result is 0.113! A non-zero result and with a p-value of 0.06983 we can say that there are 6% of chance that null hypothesis are correct (the data has random pattern).
 
-However, we need additional tests to determine whether the result is significantly difference from zero, thus we can say that it is not random (reject null hypothesis).
+The result is 0.113! A positive result that might suggest the data has a clustered pattern.
 
-#### Assessing Moran I coefficient
+However, we need additional tests to determine whether the result is significantly difference from zero, thus we can say that it is not random (reject null hypothesis). Note that we use one-tailed hypothethic test by assign "greater" as alternative (means we hypothesize that the data is clustered as an alternative). The result is that we got a p-value of 0.0683, meaning that we have a 6% chance that the null hypothesis is correct (the data has random pattern).
 
-To assess the Moran I coefficient we can do a monte carlo simulation by randomly permute the count values across all polygons, then we compute a Moran’s I coefficient for each permuted set of values.
+Second, another approach to assess the Moran I coefficient we can do a Monte Carlo simulation by randomly permute the count values across all polygons, then we compute a Moran’s I coefficient for each permuted set of values.
 
 ```
-> MC<- moran.mc(join$n, lw, nsim=999, alternative="greater")
-> MC
+> moran.mc(join$n, weight, nsim=999, alternative="greater")
 
 	Monte-Carlo simulation of Moran I
 
 data:  join$n 
-weights: lw  
+weights: weight 
 number of simulations + 1: 1000 
 
-statistic = 0.11263, observed rank = 942, p-value = 0.058
+statistic = 0.11263, observed rank = 924, p-value = 0.076
 alternative hypothesis: greater
 ```
 
 Then we can plot the histogram of the permutated Moran I value,
 ![image](https://github.com/user-attachments/assets/38b0f40c-aa41-49cb-b663-29eaf532c76e)
 
-From the monte carlo simulations we can conlude that our observed Moran’s I value of 0.113 is not a value we would expect to compute if the income values were randomly distributed across each districts. As we got a p-value of 0.058 from this simulation, meaning there is a 6% chance of error if we reject the null hypothesis (declare the pattern is random) meaning that the I coefficient is significantly different.
+From the monte carlo simulations, we can conclude that our observed Moran’s I value of 0.113 is not a value we would expect to compute if the income values were randomly distributed across each district. As we got a p-value of 0.058 from this simulation, meaning there is a 6% chance of error if we reject the null hypothesis (declare the pattern is random).
 
-In conclusion, we can conclude that the urban farming spot location is **clustered** (with moran I coefficient greater than 0 (zero) within Jakarta with a concentration both in the east and west side.
+### Discussion
+
+From both tests, we got p-value of 0.0683 from analytical test and p-value of 0.076 from Monte Carlo test. Thus, _there is less than a 6% likelihood that the observed pattern could be the result of random chance_, hence with a standard significance level of 0.05 (confidence level 95%), we can conclude that there is not enough statistical evidence to reject the null hypothesis (the data pattern being random).
+
+In conclusion, while there is a visual clustered-like pattern and positive Moran's I coefficient, the quantitative calculation told us that the pattern of urban farming location in Jakarta is random. However, the significance test result had a very close call from being statistically significant, therefore further tests such as Local Moran's I are needed.
 
 ## Reference
 
 https://mgimond.github.io/Spatial/spatial-autocorrelation.html
 
-https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-statistics/h-how-spatial-autocorrelation-moran-s-i-spatial-st.htm
+https://mgimond.github.io/es214_support_tutorials/moranI/Mapping_and_Morans.html
+
+https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-statistics/spatial-autocorrelation.htm
+
+Lembo, A. J., Jr., & McGrew, J. C., Jr. (2023). *An introduction to statistical problem solving in geography* (4th ed.). Waveland Press.
