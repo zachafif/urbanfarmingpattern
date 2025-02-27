@@ -144,7 +144,9 @@ View of Jakarta (Kep.Seribu Isles)
 ![Rplot01](https://github.com/user-attachments/assets/45c73891-ce00-456a-a9b8-1fb929512f3d)
 
 View per Cities
-![image](https://github.com/user-attachments/assets/d1a556b4-ba94-4026-8ba4-423b7bdbd5df)
+
+![image](https://github.com/user-attachments/assets/63dead0f-63f6-4fd9-b7ca-89be01423bdf)
+
 
 
 ### Global Moran I Coefficient determination
