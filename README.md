@@ -1,5 +1,5 @@
 # Urban Farming Spatial Pattern
-Portfolio project about spatial autocorellation of urban farming location in Jakarta
+Portfolio project about spatial autocorrelation of urban farming location in Jakarta
 
 ## Introduction
 
