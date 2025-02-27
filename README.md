@@ -11,6 +11,8 @@ Tobler stated that the first law of geography, observation of certain phenomenon
 ### Urban Agriculture
 Urban agriculture has gained increasing attention in recent years as a strategy for addressing food security, climate change, and sustainable development challenges in urban areas such as Jakarta. As there are limited spaces to do conventional farming and increasing demands for food production in Indonesia due to it constant increase of population in Jakarta, urban agriculture can serve as an alternative solution for this problem.
 
+![image](https://github.com/user-attachments/assets/24d83692-5f78-4641-99d2-9f5d429972d6)
+
 Efforts to encourage urban agriculture has been made by Jakarta’s government and urban farms has been emerging in Jakarta for the past years. In this post, we will analyze on the spatial pattern of urban farms and discuss the result further.
 
 
